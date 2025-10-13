@@ -1,0 +1,23 @@
+/* React App 样式 */
+#react-root {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+#react-root h1 {
+  margin-bottom: 10px;
+}
+
+#react-root button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+#react-root button:active {
+  transform: translateY(0);
+}
+
+#react-message-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0 0;
+}

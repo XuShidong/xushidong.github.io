@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>微前端主应用</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+    }
+
+    .header {
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 0 20px;
+    }
+
+    .nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      height: 60px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1890ff;
+      margin-right: 40px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: #333;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      background: #1890ff;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    .app-container {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      min-height: 500px;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+
+    .loading.active {
+      display: block;
+    }
+
+    .status {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #fff;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      font-size: 14px;
+    }
+
+    .status-item {
+      margin: 5px 0;
+    }
+
+    .status-label {
+      font-weight: bold;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <nav class="nav">
+      <div class="logo">🚀 微前端框架</div>
+      <ul class="nav-links">
+        <li><a href="/" data-route="/">首页</a></li>
+        <li><a href="/react-app" data-route="/react-app">React应用</a></li>
+        <li><a href="/vue-app" data-route="/vue-app">Vue应用</a></li>
+        <li><a href="/vanilla-app" data-route="/vanilla-app">原生应用</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div id="loading" class="loading">
+      <p>加载中...</p>
+    </div>
+    <div id="app-container" class="app-container"></div>
+  </div>
+
+  <div class="status">
+    <div class="status-item">
+      <span class="status-label">当前路由:</span>
+      <span id="current-route">/</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">已加载应用:</span>
+      <span id="loaded-apps">0</span>
+    </div>
+  </div>
+
+  <script type="module">
+    // 这里引入构建后的框架
+    import MicroFrontend from '../../dist/index.esm.js';
+
+    // 注册微应用
+    MicroFrontend.registerMicroApps([
+      {
+        name: 'react-app',
+        entry: {
+          html: '<div id="react-root">React应用加载中...</div>',
+          scripts: ['./sub-apps/react-app.js'],
+          styles: ['./sub-apps/react-app.css']
+        },
+        container: '#app-container',
+        activeRule: '/react-app',
+        loader: (loading) => {
+          document.getElementById('loading').classList.toggle('active', loading);
+        }
+      },
+      {
+        name: 'vue-app',
+        entry: {
+          html: '<div id="vue-root">Vue应用加载中...</div>',
+          scripts: ['./sub-apps/vue-app.js'],
+          styles: ['./sub-apps/vue-app.css']
+        },
+        container: '#app-container',
+        activeRule: '/vue-app',
+        loader: (loading) => {
+          document.getElementById('loading').classList.toggle('active', loading);
+        }
+      },
+      {
+        name: 'vanilla-app',
+        entry: {
+          html: '<div id="vanilla-root">原生应用加载中...</div>',
+          scripts: ['./sub-apps/vanilla-app.js'],
+          styles: []
+        },
+        container: '#app-container',
+        activeRule: '/vanilla-app',
+        loader: (loading) => {
+          document.getElementById('loading').classList.toggle('active', loading);
+        }
+      }
+    ]);
+
+    // 启动框架
+    MicroFrontend.start();
+
+    // 更新导航状态
+    function updateNav() {
+      const links = document.querySelectorAll('.nav-links a');
+      links.forEach(link => {
+        if (link.getAttribute('href') === window.location.pathname) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+
+      document.getElementById('current-route').textContent = window.location.pathname;
+    }
+
+    // 监听路由变化
+    import { addRouteChangeListener, getApps } from '../../dist/index.esm.js';
+    
+    addRouteChangeListener(() => {
+      updateNav();
+      
+      // 更新已加载应用数
+      const apps = getApps();
+      const loadedCount = apps.filter(app => app.status !== 'NOT_LOADED').length;
+      document.getElementById('loaded-apps').textContent = loadedCount;
+    });
+
+    // 初始化导航
+    updateNav();
+
+    // 阻止默认链接跳转
+    document.addEventListener('click', (e) => {
+      const target = e.target.closest('a[data-route]');
+      if (target) {
+        e.preventDefault();
+        const href = target.getAttribute('href');
+        MicroFrontend.navigateTo(href);
+      }
+    });
+  </script>
+</body>
+</html>
