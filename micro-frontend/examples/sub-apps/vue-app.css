@@ -1,0 +1,23 @@
+/* Vue App 样式 */
+#vue-root {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+#vue-root h1 {
+  margin-bottom: 10px;
+}
+
+#vue-root input:focus {
+  outline: none;
+  border-color: #35495e;
+  box-shadow: 0 0 0 3px rgba(66, 185, 131, 0.1);
+}
+
+#vue-root button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+#vue-root button:active {
+  transform: translateY(0);
+}
